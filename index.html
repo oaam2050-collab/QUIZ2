@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مراجعة دراسات إسلامية - أول متوسط</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family:'Tajawal',sans-serif;
+  background:#0d1b2a;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:30px 16px;
+  color:#fff;
+}
+
+/* ===== شاشة الاسم ===== */
+.name-screen {
+  width:100%; max-width:480px;
+  background:#142233;
+  border-radius:24px;
+  padding:44px 36px;
+  border:2px solid #1e3a55;
+  text-align:center;
+  animation:fadeUp .4s ease;
+}
+.name-screen .logo { font-size:3.2rem; margin-bottom:14px; }
+.name-screen h1 { font-size:1.7rem; font-weight:900; color:#fff; margin-bottom:6px; }
+.name-screen .sub { color:#7ecfc9; font-size:.95rem; margin-bottom:28px; }
+
+.name-input {
+  width:100%; background:#0d1b2a;
+  border:2px solid #1e3a55; border-radius:14px;
+  padding:15px 18px; font-family:'Tajawal',sans-serif;
+  font-size:1.1rem; color:#fff; text-align:center;
+  outline:none; transition:border-color .2s; margin-bottom:18px;
+}
+.name-input:focus { border-color:#7ecfc9; }
+.name-input::placeholder { color:#3a5570; }
+
+.start-btn {
+  width:100%; background:#7ecfc9; color:#0d1b2a;
+  border:none; padding:15px; border-radius:50px;
+  font-family:'Tajawal',sans-serif; font-size:1.15rem;
+  font-weight:900; cursor:pointer; transition:all .2s;
+}
+.start-btn:hover:not(:disabled) { background:#5bb8b2; transform:translateY(-2px); }
+.start-btn:disabled { background:#1e3a55; color:#3a5570; cursor:default; }
+
+/* ===== رأس الاختبار ===== */
+#quizSection { display:none; width:100%; max-width:720px; flex-direction:column; align-items:center; }
+
+.quiz-header {
+  width:100%; text-align:center; margin-bottom:20px;
+}
+.quiz-header h1 { font-size:1.5rem; font-weight:900; color:#fff; }
+.quiz-header .student-name { color:#7ecfc9; font-size:1rem; margin-top:4px; }
+
+/* Progress */
+.progress-wrap { width:100%; margin-bottom:24px; }
+.progress-bar {
+  width:100%; height:8px; background:#142233;
+  border-radius:99px; overflow:hidden; margin-bottom:6px;
+}
+.progress-fill {
+  height:100%; background:linear-gradient(90deg,#7ecfc9,#4db8b0);
+  border-radius:99px; transition:width .4s ease; width:0%;
+}
+.progress-text { font-size:.85rem; color:#7ecfc9; text-align:left; }
+
+/* ===== بطاقة السؤال ===== */
+.question-card {
+  width:100%; background:#142233;
+  border-radius:20px; padding:28px 24px;
+  border:2px solid #1e3a55; margin-bottom:20px;
+  transition:border-color .3s;
+}
+.question-card.answered { border-color:#243d55; }
+
+.q-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.q-num {
+  background:#1e3a55; color:#7ecfc9;
+  font-size:.8rem; font-weight:900;
+  padding:4px 12px; border-radius:20px; white-space:nowrap;
+}
+.q-text { font-size:1.1rem; font-weight:700; color:#e8f0f8; line-height:1.7; }
+
+.options { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+
+.opt-btn {
+  background:#0d1b2a; border:2px solid #1e3a55;
+  border-radius:14px; padding:14px 18px;
+  font-family:'Tajawal',sans-serif; font-size:1rem;
+  font-weight:700; color:#c5d8ea; cursor:pointer;
+  transition:all .22s; text-align:right; display:flex;
+  align-items:center; gap:12px;
+}
+.opt-btn .badge {
+  background:#1e3a55; color:#7ecfc9;
+  font-size:.8rem; font-weight:900;
+  padding:3px 9px; border-radius:8px; min-width:28px;
+  text-align:center; flex-shrink:0;
+}
+.opt-btn:hover:not(:disabled) {
+  background:#1a2f45; border-color:#7ecfc9;
+  color:#fff; transform:translateY(-1px);
+}
+.opt-btn:disabled { cursor:default; transform:none; }
+
+.opt-btn.correct {
+  background:#0a2e20; border-color:#27ae60; color:#27ae60;
+  animation:popIn .4s ease;
+}
+.opt-btn.correct .badge { background:#27ae60; color:#fff; }
+
+.opt-btn.wrong {
+  background:#2e0a0a; border-color:#e74c3c; color:#e74c3c;
+  animation:shake .4s ease;
+}
+.opt-btn.wrong .badge { background:#e74c3c; color:#fff; }
+
+.opt-btn.reveal {
+  background:#0a2e20; border-color:#27ae60; color:#27ae60; opacity:.55;
+}
+.opt-btn.reveal .badge { background:#27ae60; color:#fff; }
+
+@keyframes popIn {
+  0% { transform:scale(1); }
+  50% { transform:scale(1.03); }
+  100% { transform:scale(1); }
+}
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  25% { transform:translateX(-6px); }
+  75% { transform:translateX(6px); }
+}
+
+.feedback {
+  margin-top:14px; padding:12px 16px;
+  border-radius:12px; font-size:.95rem; font-weight:700;
+  display:none; align-items:center; gap:10px;
+}
+.feedback.show { display:flex; animation:fadeUp .3s ease; }
+.feedback.ok { background:#0a2e20; color:#27ae60; border:1.5px solid #27ae60; }
+.feedback.no { background:#2e0a0a; color:#e74c3c; border:1.5px solid #e74c3c; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* ===== لوحة النتيجة ===== */
+.score-panel {
+  width:100%; background:#142233;
+  border-radius:24px; padding:40px 30px;
+  border:2px solid #1e3a55; text-align:center;
+  display:none; margin-top:10px;
+}
+.score-panel.show { display:block; animation:fadeUp .5s ease; }
+
+.score-emoji { font-size:3.5rem; margin-bottom:16px; }
+.score-title { font-size:1.3rem; color:#7ecfc9; margin-bottom:8px; }
+.score-big { font-size:4rem; font-weight:900; color:#fff; line-height:1; }
+.score-total { font-size:1rem; color:#7ecfc9; margin-top:6px; }
+.score-msg { font-size:1.1rem; color:#c5d8ea; margin-top:16px; }
+
+.score-breakdown {
+  display:flex; justify-content:center; gap:24px;
+  margin-top:24px; flex-wrap:wrap;
+}
+.breakdown-item {
+  background:#0d1b2a; border-radius:16px;
+  padding:14px 22px; text-align:center;
+}
+.breakdown-num { font-size:1.8rem; font-weight:900; }
+.breakdown-label { font-size:.8rem; color:#7ecfc9; margin-top:2px; }
+.green { color:#27ae60; }
+.red { color:#e74c3c; }
+
+.retry-btn {
+  margin-top:28px; background:#7ecfc9; color:#0d1b2a;
+  border:none; padding:14px 50px; border-radius:50px;
+  font-family:'Tajawal',sans-serif; font-size:1.1rem;
+  font-weight:900; cursor:pointer; transition:all .2s;
+}
+.retry-btn:hover { background:#5bb8b2; transform:translateY(-2px); }
+</style>
+</head>
+<body>
+
+<!-- شاشة الاسم -->
+<div class="name-screen" id="nameScreen">
+  <div class="logo">📖</div>
+  <h1>مراجعة دراسات إسلامية</h1>
+  <p class="sub">الصف الأول متوسط — الفصل الدراسي الثاني</p>
+  <input class="name-input" id="nameInput" type="text"
+    placeholder="اكتبي اسمك الكامل..."
+    oninput="document.getElementById('startBtn').disabled=this.value.trim()==='';"
+    onkeydown="if(event.key==='Enter')startQuiz()">
+  <button class="start-btn" id="startBtn" onclick="startQuiz()" disabled>ابدئي الاختبار ←</button>
+</div>
+
+<!-- قسم الاختبار -->
+<div id="quizSection" style="display:none;width:100%;max-width:720px;flex-direction:column;align-items:center;">
+  <div class="quiz-header">
+    <h1>📖 مراجعة دراسات إسلامية</h1>
+    <div class="student-name" id="studentLabel"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 / 53</div>
+  </div>
+
+  <div id="quizContainer" style="width:100%;"></div>
+
+  <div class="score-panel" id="scorePanel">
+    <div class="score-emoji" id="scoreEmoji">🎉</div>
+    <div class="score-title" id="scoreTitle"></div>
+    <div class="score-big" id="scoreBig"></div>
+    <div class="score-total" id="scoreTotal"></div>
+    <div class="score-msg" id="scoreMsg"></div>
+    <div class="score-breakdown">
+      <div class="breakdown-item">
+        <div class="breakdown-num green" id="correctCount">0</div>
+        <div class="breakdown-label">إجابات صحيحة ✅</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-num red" id="wrongCount">0</div>
+        <div class="breakdown-label">إجابات خاطئة ❌</div>
+      </div>
+    </div>
+    <button class="retry-btn" onclick="resetQuiz()">🔄 أعيدي المحاولة</button>
+  </div>
+</div>
+
+<script>
+const LABELS = ['أ','ب','ج'];
+
+const questions = [
+  {q:"ما هو تعريف الغلو في الدين؟",opts:["التقصير في أداء العبادات","تجاوز الحد الذي أمر الله به في الدين","اتباع سنة النبي ﷺ"],correct:1},
+  {q:"ما هو الواجب على المسلم تجاه الأنبياء والصالحين؟",opts:["التوسط فيهم وإنزالهم منازلهم اللائقة","رفعهم فوق منزلتهم التي أنزلهم الله إياها","جحد حقوقهم التي جعلها الله لهم"],correct:0},
+  {q:"أول ما وقع الشرك في قوم نوح عليه السلام كان سببه:",opts:["الإنكار والتكبر","قلة الأموال والأولاد","الغلو في تعظيم الصالحين"],correct:2},
+  {q:"مَن هم آل بيت النبي ﷺ؟",opts:["أولاده وذريتهم وأزواجه وأقاربه الذين تحرم عليهم الزكاة","جميع سكان مكة والمدينة","عموم المسلمين في كل البلاد"],correct:0},
+  {q:"موقف أهل السنة والجماعة تجاه آل بيت النبي ﷺ هو:",opts:["الطعن فيهم وسبهم","محبتهم وإنزالهم منزلتهم التي أنزلهم الله تعالى","رفعهم فوق مكانتهم ودعاؤهم من دون الله"],correct:1},
+  {q:"من أمثلة الغلو في آل البيت (وهو من أسباب الشرك):",opts:["الصلاة على النبي ﷺ وآله","احترامهم وتقديرهم لقربهم من الرسول ﷺ","دعاؤهم من دون الله والاستغاثة بهم في الشدائد"],correct:2},
+  {q:"ما معنى كلمة (سلطاناً) كما ورد في التفسير؟",opts:["مالاً وجاهاً","حجة وبرهاناً","قوة وجنوداً"],correct:1},
+  {q:"ماذا يفعل الناس عادةً إذا أصابهم شدة وبلاء (ضر)؟",opts:["ينسون ذكر الله تماماً","ينفقون أموالهم","يخلصون الدعاء والتضرع لله"],correct:2},
+  {q:"مَن هو \"ابن السبيل\" الذي أمر الله بإعطائه حقه؟",opts:["المسافر الذي انقطع به الطريق","الجار القريب من المنزل","المجاهد في سبيل الله"],correct:0},
+  {q:"فرح البطر المراد به:",opts:["فرح الشكر والحمد","فرح إنجاب الأطفال","الفرح الذي لا شكر فيه"],correct:2},
+  {q:"مَن هم \"المُضعفون\" في قوله تعالى (فأولئك هم المضعفون)؟",opts:["الذين يضاعف الله لهم الثواب والأجر","الذين يعانون من ضعف جسدي","الذين يقل ثوابهم بسبب معاصيهم"],correct:0},
+  {q:"ما هو سبب ظهور الفساد في البر والبحر (مثل القحط والأمراض)؟",opts:["كثرة الأموال والتجارة","بسبب كثرة السفر والتنقل","بسبب ما اقترفه الناس من المعاصي والذنوب"],correct:2},
+  {q:"ما هي صفة \"لقمان\" كما ورد في الدرس؟",opts:["ملك من الملوك العظام","عبد صالح أعطاه الله الحكمة","رسول من الرسل"],correct:1},
+  {q:"ما هي أول وصية وصى بها لقمان ابنه؟",opts:["النهي عن الشرك بالله","الوصية بالصلاة","الأمر ببر الوالدين"],correct:0},
+  {q:"ما معنى \"وَهْناً على وَهْنٍ\" في وصف حمل الأم لجنينها؟",opts:["قوة فوق قوة","ضعفاً على ضعف","فرحاً فوق فرح"],correct:1},
+  {q:"هو القول المقرون بالترغيب والترهيب:",opts:["النصيحة","الدعاء","الوعظ"],correct:2},
+  {q:"أعظم الذنوب وأعظم أنواع الظلم لما فيه من التعدي على حق الله تعالى:",opts:["عقوق الوالدين","ترك الصلاة","الشرك بالله"],correct:2},
+  {q:"ما معنى \"الظن\" الذي حذر منه النبي ﷺ في الحديث؟",opts:["اليقين الكامل بالشيء","التهمة بلا دليل","الصدق في الحديث"],correct:1},
+  {q:"معناه البحث عن العورات والعيوب:",opts:["التناجش","التجسس","سوء الظن"],correct:1},
+  {q:"ما هو التناجش؟",opts:["المقاطعة بين المسلمين","زيادة السعر على سلعة لا يريد الشخص شراءها","كراهية الخير للناس"],correct:1},
+  {q:"هو تمني الشخص زوال النعمة عن أخيه المسلم:",opts:["التجسس","الحسد","التدابر"],correct:1},
+  {q:"من الأعمال المفسدة للمودة والمحبة والصلة:",opts:["الاتهام بدون دليل","تبادل الزيارات","كثرة الحديث"],correct:0},
+  {q:"ما هي الفائدة من التحلي بالآداب والأخلاق الإسلامية؟",opts:["الحصول على المال والجاه","زيادة الألفة والمودة بين المسلمين","التفاخر بين الناس"],correct:1},
+  {q:"من هو \"المسلم الجامع لخصال الإسلام\" كما ورد في الحديث الشريف؟",opts:["من يهتم بصلاته فقط","من يسافر كثيراً لطلب العلم","من لم يؤذِ غيره بقول ولا فعل"],correct:2},
+  {q:"لماذا خصَّ النص \"اللسان واليد\" بالذكر في كف الأذى؟",opts:["لأنهما أقوى أعضاء الجسم","لكثرة أخطائهما وأضرارهما وصدور معظم الشرور عنهما","لأنهما لا يحاسب عليهما الإنسان"],correct:1},
+  {q:"هل التخفي بأسماء مستعارة في وسائل التواصل يُعفي من المسؤولية؟",opts:["نعم، لأنه غير معروف","نعم، إذا كان يمزح مع الآخرين","لا، لا يُعفيه من المسؤولية الشرعية والقانونية"],correct:2},
+  {q:"تحريم الأذى في الإسلام يشمل:",opts:["الأذى المباشر فقط","الأذى غير المباشر (مثل الاعتداء عبر وسائل التواصل)","الأذى المباشر وغير المباشر"],correct:2},
+  {q:"سُئل النبي ﷺ \"أي الإسلام خير؟\" فكانت إجابته:",opts:["السفر للتجارة","تُطعم الطعام وتقرأ السلام","بناء البيوت والمساكن"],correct:1},
+  {q:"على مَن يُلقي المسلمُ السلامَ كما ورد في الحديث؟",opts:["على من تعرفه فقط","على من لم تعرفه فقط","على مَن تعرفه ومَن لا تعرفه"],correct:2},
+  {q:"ما هو تعريف التطوع في الصلاة؟",opts:["ما يفعله المسلم من الأمور الواجبة عليه","ما يفعله المسلم من الأمور المشروعة غير الواجبة","الصلوات الخمس المفروضة فقط"],correct:1},
+  {q:"ما هي الحكمة من مشروعية صلاة التطوع؟",opts:["جبر النقص في الفرائض","استبدالها بالصلوات المفروضة","لأنها واجبة مثل صلاة الفجر"],correct:0},
+  {q:"صلاة الوتر: أقلها ....... وأكثرها ..........",opts:["ركعة – 9 ركعات","ركعتان – 7 ركعات","ركعة – إحدى عشرة ركعة"],correct:2},
+  {q:"يستحب القنوت:",opts:["في الركعة الأولى من الرواتب","في الوتر في الركعة الأخيرة","في نافلة صلاة الفجر"],correct:1},
+  {q:"من صلوات التطوع، أقلها ركعتان ولا حد لأكثرها ووقتها من ارتفاع الشمس قدر رمح إلى قبيل الزوال:",opts:["راتبة الظهر","صلاة الوتر","صلاة الضحى"],correct:2},
+  {q:"صلاة الليل في رمضان جماعة:",opts:["صلاة التراويح","صلاة العيد","صلاة المغرب"],correct:0},
+  {q:"هل تُصلى تحية المسجد عند دخول المسجد يوم الجمعة والإمام يخطب؟",opts:["لا تُصلى","تُصلى ركعتين خفيفتين","تُؤجل بعد الخطبة"],correct:1},
+  {q:"متى يكون سجود التلاوة؟",opts:["بعد الصلاة فقط","عند قراءة آية سجدة أثناء تلاوة القرآن","عند النوم"],correct:1},
+  {q:"هل يشترط الطهارة لسجود التلاوة؟",opts:["لا يشترط الطهارة، لكنه الأفضل","نعم يشترط","لا تجوز بدون وضوء"],correct:0},
+  {q:"متى يُشرع سجود الشكر؟",opts:["عند كل صلاة","إذا حصلت نعمة أو اندفع شر عن المسلم","قبل صلاة الجمعة"],correct:1},
+  {q:"ما الأصل في أوقات الصلاة؟",opts:["المنع","الجواز","الكراهة"],correct:1},
+  {q:"أي الصلوات تُقضى في أوقات النهي؟",opts:["النوافل","قضاء الفرائض الفائتة","السنن الرواتب"],correct:1},
+  {q:"أي مما يلي من أوقات النهي عن الصلاة:",opts:["بعد غروب الشمس إلى منتصف الليل","من صلاة العصر حتى تغرب الشمس","من قبل صلاة الفجر إلى شروق الشمس"],correct:1},
+  {q:"حكم صلاة الجمعة؟",opts:["سنة","فرض عين","مستحبة"],correct:1},
+  {q:"على من تجب صلاة الجمعة؟",opts:["على كل مسلم","على كل مسلم ذكر بالغ عاقل مستوطن لا عذر له","على النساء فقط"],correct:1},
+  {q:"من أركان خطبتَي الجمعة:",opts:["الصلاة على النبي ﷺ","الخطبة على منبر","الدعاء للمسلمين ولي الأمر"],correct:0},
+  {q:"ماذا يحرم أثناء خطبة الجمعة؟",opts:["صلاة تحية المسجد","الكلام","تخطى الرقاب"],correct:1},
+  {q:"ماذا يفعل من لم يُدرك الركعة الثانية من الجمعة؟",opts:["يتمها جمعة","يترك الصلاة","يصليها ظهراً"],correct:2},
+  {q:"من الأعذار التي تبيح ترك صلاة الجماعة:",opts:["المرض الذي يشق معه الحضور","الرغبة في النوم قليلاً","الانشغال في العمل"],correct:0},
+  {q:"ما هو حكم صلاة الجماعة للرجال القادرين؟",opts:["سنة مستحبة","واجبة","فرض كفاية"],correct:1},
+  {q:"بمَ تدرك صلاة الجماعة؟",opts:["بإدراك تكبيرة الإحرام فقط","بإدراك ركعة واحدة مع الإمام","بإدراك التشهد الأخير"],correct:2},
+  {q:"إذا دخلت المسجد والإمام على أي حال، فماذا تفعل؟",opts:["أنتظر حتى يقوم للركعة التالية","أبدأ بصلاتي منفرداً","أكبّر وأتابعه في تلك الحال ولا أنتظره حتى يقوم"],correct:2},
+  {q:"أي من هذه الأعذار يبيح ترك صلاة الجماعة؟",opts:["الانشغال بالتجارة والبيع","حضور الطعام والإنسان جائع جوعاً يمنعه من الخشوع","السهر الطويل في الليل"],correct:1},
+  {q:"ماذا يفعل المصلي إذا أقيمت الصلاة وهو في نافلة؟",opts:["يكمل النافلة كاملة ثم يدخل مع الإمام","يقطع النافلة ليدرك تكبيرة الإحرام مع الإمام","يستمر في صلاته ولا يقطعها أبداً"],correct:1},
+];
+
+let studentName = '';
+let answers = new Array(questions.length).fill(null);
+let answered = 0;
+
+function startQuiz() {
+  studentName = document.getElementById('nameInput').value.trim();
+  if (!studentName) return;
+  document.getElementById('nameScreen').style.display = 'none';
+  const sec = document.getElementById('quizSection');
+  sec.style.display = 'flex';
+  document.getElementById('studentLabel').textContent = '👩‍🎓 ' + studentName;
+  buildQuiz();
+}
+
+function buildQuiz() {
+  const c = document.getElementById('quizContainer');
+  c.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + qi;
+
+    const opts = q.opts.map((opt, oi) =>
+      `<button class="opt-btn" id="opt-${qi}-${oi}" onclick="choose(${qi},${oi})">
+        <span class="badge">${LABELS[oi]}</span>
+        <span>${opt}</span>
+      </button>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="q-header">
+        <span class="q-num">سؤال ${qi+1} / ${questions.length}</span>
+      </div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${opts}</div>
+      <div class="feedback" id="fb-${qi}">
+        <span id="fb-icon-${qi}"></span>
+        <span id="fb-msg-${qi}"></span>
+      </div>
+    `;
+    c.appendChild(card);
+  });
+}
+
+function choose(qi, oi) {
+  if (answers[qi] !== null) return;
+  answers[qi] = oi;
+  answered++;
+
+  const q = questions[qi];
+  const isCorrect = oi === q.correct;
+
+  for (let i = 0; i < q.opts.length; i++) {
+    const btn = document.getElementById(`opt-${qi}-${i}`);
+    btn.disabled = true;
+    if (i === q.correct && !isCorrect) btn.classList.add('reveal');
+    else if (i === q.correct) btn.classList.add('correct');
+    else if (i === oi) btn.classList.add('wrong');
+  }
+
+  const fb = document.getElementById(`fb-${qi}`);
+  fb.classList.add('show', isCorrect ? 'ok' : 'no');
+  document.getElementById(`fb-icon-${qi}`).textContent = isCorrect ? '✅' : '❌';
+  document.getElementById(`fb-msg-${qi}`).textContent = isCorrect
+    ? 'إجابة صحيحة! أحسنتِ 🌟'
+    : `إجابة خاطئة. الإجابة الصحيحة: ${LABELS[q.correct]} — ${q.opts[q.correct]}`;
+
+  document.getElementById('card-' + qi).classList.add('answered');
+
+  const pct = (answered / questions.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${answered} / ${questions.length}`;
+
+  if (answered === questions.length) setTimeout(showScore, 700);
+}
+
+function showScore() {
+  const correct = answers.filter((a,i) => a === questions[i].correct).length;
+  const wrong = questions.length - correct;
+  const pct = Math.round((correct / questions.length) * 100);
+
+  let emoji, msg;
+  if (pct === 100) { emoji = '🏆'; msg = 'ممتاز! علامة كاملة، أحسنتِ يا ' + studentName + '!'; }
+  else if (pct >= 80) { emoji = '🌟'; msg = 'جيد جداً يا ' + studentName + '! واصلي التميز!'; }
+  else if (pct >= 60) { emoji = '👍'; msg = 'جيد يا ' + studentName + '! يمكنك تحقيق أفضل!'; }
+  else { emoji = '💪'; msg = 'حاولي مجدداً يا ' + studentName + '، أنتِ قادرة!'; }
+
+  document.getElementById('scoreEmoji').textContent = emoji;
+  document.getElementById('scoreTitle').textContent = 'نتيجتكِ النهائية';
+  document.getElementById('scoreBig').textContent = `${correct} / ${questions.length}`;
+  document.getElementById('scoreTotal').textContent = `النسبة: ${pct}%`;
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+
+  document.getElementById('scorePanel').classList.add('show');
+  document.getElementById('scorePanel').scrollIntoView({ behavior:'smooth' });
+}
+
+function resetQuiz() {
+  answers = new Array(questions.length).fill(null);
+  answered = 0;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressText').textContent = `0 / ${questions.length}`;
+  document.getElementById('scorePanel').classList.remove('show');
+  buildQuiz();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+</script>
+</body>
+</html>
